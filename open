@@ -1,0 +1,3 @@
+#!/bin/sh -e
+cd "$(dirname "$0")"
+nix-shell --run "jupyter-notebook MRPyMC3.ipynb"
