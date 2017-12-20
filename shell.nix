@@ -1,5 +1,5 @@
 let
-  pkgs = import <nixpkgs> {};
+  pkgs = import ./nix/nixpkgs.nix;
   pythonPackages = p: with p; let
     patsy = callPackage ./nix/patsy.nix {};
     pymc3 = callPackage ./nix/pymc3.nix { inherit Theano patsy; };
