@@ -1,9 +1,15 @@
 let
   pkgs = import <nixpkgs> {};
   pythonPackages = p: with p; let
-    pymc3 = callPackage ./nix/pymc3.nix { inherit Theano; };
-    us = callPackage ./nix/us.nix {};
+    patsy = callPackage ./nix/patsy.nix {};
+    pymc3 = callPackage ./nix/pymc3.nix { inherit Theano patsy; };
+    jellyfish = callPackage ./nix/jellyfish.nix {};
+    us = callPackage ./nix/us.nix { inherit jellyfish; };
   in [
+    ipykernel
+    ipywidgets
+    jupyter_console
+    nbconvert
     notebook
 
     # dependencies

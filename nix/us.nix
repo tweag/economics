@@ -1,10 +1,10 @@
-{ buildPythonPackage, fetchPypi }:
+{ buildPythonPackage, fetchPypi, jellyfish }:
 buildPythonPackage rec {
   pname = "us";
   version = "1.0.0";
   name = "${pname}-${version}";
 
-  buildInputs = [ ];
+  propagatedBuildInputs = [ jellyfish ];
 
   src = fetchPypi {
     inherit pname version;
