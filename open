@@ -1,3 +1,8 @@
 #!/bin/sh -e
 cd "$(dirname "$0")"
-nix-shell --run "jupyter-notebook MRPyMC3.ipynb"
+
+if [[ $# = 0 ]]; then
+  set - MRPyMC3.ipynb
+fi
+
+nix-shell --run "jupyter-notebook $*"
