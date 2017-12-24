@@ -1,8 +1,8 @@
 let
   # extend the nixpkgs package set with our own
-  myOverlay = self: super: {
+  myOverlay = self: pkgs: {
     # re-define python3 with our override
-    python3 = super.python3.override {
+    python3 = pkgs.python3.override {
       # extend python package set with our own
       packageOverrides = self: super: {
         # some additional dependencies
@@ -10,11 +10,14 @@ let
         pymc3 = super.callPackage ./pymc3.nix {};
         jellyfish = super.callPackage ./jellyfish.nix {};
         us = super.callPackage ./us.nix {};
+        Theano = super.Theano.overrideDerivation (oldAttrs: {
+          # remove libgpuarray as it doesn't build on macOS
+          buildInputs = pkgs.lib.remove super.libgpuarray oldAttrs.buildInputs;
+        });
 
         # inject those dependencies into the jupyter notebook
         notebook = super.notebook.overrideDerivation (oldAttrs: {
           propagatedBuildInputs = with super; oldAttrs.propagatedBuildInputs ++ [
-            Theano
             basemap
             matplotlib
             numpy
@@ -22,6 +25,7 @@ let
             pandas
             self.pymc3
             self.us
+            self.Theano
           ];
         });
       };
