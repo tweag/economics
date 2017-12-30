@@ -1,5 +1,16 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE DataKinds, FlexibleContexts, TemplateHaskell, TypeOperators, TypeSynonymInstances, FlexibleInstances, QuasiQuotes, UndecidableInstances, ExplicitForAll, ScopedTypeVariables, OverloadedStrings, GADTs #-}
+{-# LANGUAGE DataKinds,
+ FlexibleContexts,
+ TemplateHaskell,
+ TypeOperators,
+ TypeSynonymInstances,
+ FlexibleInstances,
+ QuasiQuotes,
+ UndecidableInstances,
+ ExplicitForAll,
+ ScopedTypeVariables,
+ OverloadedStrings,
+ GADTs #-}
 
 module Main where
 
@@ -34,16 +45,17 @@ type MiniMarriage = Record '[ RaceWbh, AgeCat, EduCat, Female, StateInitnum
 miniMarriage :: Marriage -> MiniMarriage
 miniMarriage = rcast
 
-type BiggerMarriage = Record '[ RaceWbhI, AgeCatI, EduCatI, StateInitnumI,
+type BiggerMarriage = Record '[ RaceWbhI, AgeCatI, EduCatI, StateInitnumI, RegionCatI,
                                 RaceWbh, AgeCat, EduCat, Female, StateInitnum
                               , State, RegionCat, Region, Statename, Poll
                               , YesOfAll
                               ]
 
-type MiniMarriageTyped = Record '[ RaceWbhI, AgeCatI, EduCatI, Female, StateInitnumI
-                                 , State, RegionCat, Region, Statename, Poll
-                                 , YesOfAll
-                                 ]
+type MiniMarriageTyped =
+  Record '[ RaceWbhI, AgeCatI, EduCatI, Female, StateInitnumI, RegionCatI
+          , State, RegionCat, Region, Statename, Poll
+          , YesOfAll
+          ]
 
 miniMarriageTyped :: BiggerMarriage -> MiniMarriageTyped
 miniMarriageTyped = rcast
@@ -85,9 +97,19 @@ stateInitnumI = rlens (Proxy :: Proxy StateInitnumI)
 getStateInitnum :: MiniMarriage -> Record '[StateInitnumI]
 getStateInitnum x = pure (Col ((read $ unpack (x ^. stateInitnum)) :: Int)) :& Nil
 
-intFieldDoubler :: Record '[StateInitnumI, RaceWbhI, AgeCatI, EduCatI] ->
-                   Record '[StateInitnumI, RaceWbhI, AgeCatI, EduCatI]
-intFieldDoubler = mapMono (+ (-1))
+type RegionCatI = "regionCatI" :-> Int
+
+regionCatI :: (Functor f, (RElem RegionCatI rs (RIndex RegionCatI rs))) =>
+        (Int -> f Int) -> Record rs -> f (Record rs)
+regionCatI = rlens (Proxy :: Proxy RegionCatI)
+
+getRegionCat :: MiniMarriage -> Record '[RegionCatI]
+getRegionCat x = pure (Col ((read $ unpack (x ^. regionCat)) :: Int)) :& Nil
+
+
+intToZeroIndexed :: Record '[StateInitnumI, RaceWbhI, AgeCatI, EduCatI, RegionCatI] ->
+                    Record '[StateInitnumI, RaceWbhI, AgeCatI, EduCatI, RegionCatI]
+intToZeroIndexed = mapMono (+ (-1))
 
 main :: IO ()
 main = do
@@ -102,10 +124,14 @@ main = do
       biggerMarriage = fmap (\x -> (getRaceWbh x)      `rappend`
                                    (getAgeCat x)       `rappend`
                                    (getEduCat x)       `rappend`
-                                   (getStateInitnum x) `rappend` x) $
+                                   (getStateInitnum x) `rappend`
+                                   (getRegionCat x)    `rappend` x) $
                        fmap miniMarriage msClean
-  mapM_ print $ Prelude.take 6 $ toList $
-    fmap (rsubset %~ intFieldDoubler) $
-    fmap miniMarriageTyped biggerMarriage
+  let surveyDf = fmap (rcast @'[RaceWbhI, AgeCatI, EduCatI, Female, StateInitnumI,
+                                State, RegionCatI, Region, Statename, Poll, YesOfAll]) $
+                 fmap (rsubset %~ intToZeroIndexed) $
+                 fmap miniMarriageTyped biggerMarriage
+
+  mapM_ print $ Prelude.take 6 $ toList surveyDf
   return ()
 

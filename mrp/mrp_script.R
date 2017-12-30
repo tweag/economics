@@ -31,3 +31,17 @@ marriage.data.noNA <- subset(marriage.data,!(is.na(marriage.data$race.wbh) |
                                              is.na(marriage.data$state.initnum)))
 
 marriage.data.cat <- subset(marriage.data.noNA,select=c('race.wbh', 'age.cat', 'edu.cat', 'female', 'state.initnum', 'state', 'region.cat', 'region', 'statename', 'poll', 'yes.of.all'))
+
+library(ggplot2)
+library(dplyr)
+choro <- left_join(
+  map_data("state"), 
+  USArrests %>% 
+    add_rownames("region") %>% 
+    mutate(region=tolower(region))
+)
+png("test.png", width=1200, height=1200, units="px", type="cairo")
+ggplot(choro, aes(long, lat)) +
+  geom_polygon(aes(group = group, fill = Assault)) + 
+  coord_quickmap()
+dev.off()
