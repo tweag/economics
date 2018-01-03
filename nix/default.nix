@@ -25,7 +25,7 @@ let
             pandas
             self.pymc3
             self.us
-            self.Theano
+            # self.Theano
           ];
         });
       };
