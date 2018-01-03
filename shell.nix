@@ -4,7 +4,19 @@ let
 in
 pkgs.stdenv.mkDerivation {
   name = "xxx";
-  buildInputs = [
-    pkgs.notebook
-  ];
+
+buildInputs = with pkgs.rPackages; [
+      pkgs.R
+      ggplot2
+      dplyr
+      maps
+      Cairo
+      knitr
+      arm
+      foreign
+      maps
+      plyr
+      mapproj
+    ];
+
 }
