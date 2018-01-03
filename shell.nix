@@ -6,6 +6,7 @@ pkgs.stdenv.mkDerivation {
   name = "xxx";
 
   buildInputs = with pkgs.rPackages; [
+    pkgs.scipy
     pkgs.R
     ggplot2
     dplyr
