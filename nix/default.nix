@@ -31,6 +31,17 @@ let
       };
     };
 
+    # Scientific python
+    scipy = self.python3.withPackages(p: with p; [
+      basemap
+      matplotlib
+      numpy
+      pandas
+      pymc3
+      seaborn
+      us
+    ]);
+
     # and finally expose the notebook to the top-level
     notebook = self.python3.pkgs.notebook;
   };
