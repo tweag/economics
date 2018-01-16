@@ -1,25 +1,18 @@
 let
-config = {
-  packageOverrides = pkgs: rec {
+  overlay = self: pkgs: {
     haskellPackages = pkgs.haskellPackages.override {
-      overrides = haskellPackagesNew: haskellPackagesOld: rec {
-        project1 =
-          haskellPackagesNew.callPackage ./default.nix { };
-        hmatrix =
-          if pkgs.stdenv.isDarwin
-          then pkgs.haskell.lib.addBuildDepends (pkgs.haskell.lib.enableCabalFlag (pkgs.haskell.lib.enableCabalFlag (haskellPackagesNew.callPackage ./hmatrix.nix { }) "openblas") "disable-default-paths") pkgs.darwin.apple_sdk.frameworks.Accelerate
-          else pkgs.haskell.lib.enableCabalFlag (pkgs.haskell.lib.enableCabalFlag (haskellPackagesNew.callPackage ./hmatrix.nix { }) "openblas") "disable-default-paths";
+      overrides = hsSelf: hsPkgs: {
+        project1 = hsSelf.callPackage ./default.nix { };
+        hmatrix = hsSelf.callPackage ./hmatrix.nix { };
       };
     };
   };
-};
 
-pkgs = import <nixpkgs> { inherit config; };
-
+  pkgs = import <nixpkgs> {
+    config = {};
+    overlays = [ overlay ];
+  };
 in
-{ project1 = pkgs.haskellPackages.project1;
-}
-
-# hmatrix = if pkgs.stdenv.isDarwin                                             
-#     then addBuildDepend super.hmatrix pkgs.darwin.apple_sdk.frameworks.Accelerate
-#     else super.hmatrix; 
+  {
+    inherit (pkgs.haskellPackages) project1;
+  }
