@@ -1,6 +1,8 @@
+{ compiler ? "ghc822" }:
+
 let
   overlay = self: pkgs: {
-    haskellPackages = pkgs.haskellPackages.override {
+    haskellPackages = pkgs.haskell.packages.${compiler}.override {
       overrides = hsSelf: hsPkgs: {
         project1 = hsSelf.callPackage ./default.nix { };
         hmatrix = hsSelf.callPackage ./hmatrix.nix { };
